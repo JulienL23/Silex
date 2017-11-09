@@ -40,7 +40,7 @@ Intro : Qu'esc-ce que Silex ?
     B/ Fonctionnalités communes : Un framework permet de récupérer des briques déjà existantes... et les récupérer du site A vers le site B etc... (Briques : Connexion, inscription, session, commentaire...)
 
     C/Services disponnibles : Tous les frameworks proposent des services : routage(routing), la sécurité, la gestion du cache etc...
-    Cela vous permet de vous concentrer et de passer plus de temps au développement de vos propres fon ctionnalités !
+    Cela vous permet de vous concentrer et de passer plus de temps au développement de vos propres fonctionnalités !
 
 2/ Quel choix de Framework ?
 
@@ -60,9 +60,9 @@ Intro : Qu'esc-ce que Silex ?
 
     C/ Documentation : https://silex.sensiolabs.org/doc/2.0
 
-----------------------------------------------------
-ETAPE 0 : Base de notre app : site_mvc (procédural)
-----------------------------------------------------
+----------------------------------------------------------------------------
+ETAPE 0 : Base de notre app : site_mvc (procédural) (Modèle-vue-contrôleur)
+----------------------------------------------------------------------------
 
 Pour commencer la compréhension de silex, nous allons partir sur la base d'un morceau de site en procédural et en MVC afin d'avancer étape par étape :
 
@@ -182,6 +182,16 @@ Sommaire :
 
         127.0.0.1   localhost
         127.0.0.1   www.boutique.dev
+
+        <code>
+        <VirtualHost *:80>
+            DocumentRoot "C:\xampp\htdocs\silex\BOUTIQUE\web"
+            ServerName BOUTIQUE
+            ServerAlias www.boutique.dev
+            <Directory "C:\xampp\htdocs\silex\BOUTIQUE\web">
+                AllowOverride all
+            </Directory>
+        </VirtualHost>
 
 -------------------------------------------
 ETAPE 5 : HTACCESS POUR RETIRER INDEX.PHP :
@@ -323,3 +333,90 @@ Sommaire :
     --->La logique Controller / Model reste la même qu'auparavant.
 
     /!\ ATTENTION : Dans notre vue view.php, nous utilisons des arrays ($produit['titre']) mais maintenant on doit utiliser des objets ($produit -> getTitre())
+
+10/ Modification de view.php
+    -> on remplace les arrays par l'utilisation des getter :
+    ARRAY : <?= $pdt['titre'] ?>
+    ARRAY : <?= $pdt -> getTitre() ?>
+    TWIG  : {{ pdt.titre }}
+
+11/ Modification du fichier index.php
+    -> On met en commentaire $app['debug'] - true; , puisquenous l'avons mis dans dev.php.
+    -> On ajoute les require de app.php et dev.php avant le require de routes.php
+
+---> A ce stade, notre home doit afficher tous les produit et le menu des categories.
+---> Cette étape nous a permis d'introduire une modélisation objet (propre à silex : DAO, Routing...)
+---> Nous avons beaucoup travaillé la partie MODELS (DAO) et CONTROLLER (Routes.php), à l'étape suivante nous allons nous intéresser à la partie VIEWS avec TWIG
+
+--------------------------------------------------
+ETAPE 8 : UTILISATION DES SERVICES SILEX (Twig) :
+(Ajout de l'utilisation de la fonction render)
+--------------------------------------------------
+Sommaire:
+1/ Intro
+2/ Modification composer.Json
+3/ Mise à jour via composer
+4/ Modification de app.php (enregistrement des nouveaux services)
+5/ Modification des fichiers view.php, produit.php en Twig
+6/ Fonction render() : modification des routes
+--------
+
+1/ Intro :
+    -> Il existe plusieurs moteurs template : Liquid, TPL, smarty, Blade et Twig.
+        Pour Symfony et Silex, le moteur c'est TWIG.
+
+    -> De manière générale un moteur de template permet de simplifié l'insertion de variables et de boucles PHP dans des blocs HTML. (idée des formes contractée)
+
+    -> TWIG à l'avantage de proposer un système d'héritage. En d'autres termes, des morceaux d'HTML vont hérité d'autres morceaux d'HTML.
+        Exemple : Le formulaire d'inscription hérite du template générale de la page.
+
+2/ Modification du json :
+    <code>
+    {
+    "require": {
+        "silex/silex": "~2.0",
+        "doctrine/dbal": "2.5",
+        "twig/twig": "~1.28"
+    },
+    "autoload": {
+        "psr-4" : {"BOUTIQUE\\": "src"}
+    }
+}
+
+3/ Mise à jour via composer
+    <cmd> ( clique droit + maj dans BOUTIQUE )
+    composer update
+
+4/ Modification de app.php
+    -> enregistrement aux services Twig
+    -> l'enregistrement nécessite qu'on passe en argument
+
+    <code>
+    $app -> register(new Silex\Provider\TwigServiceProvider(), array(
+        'twig.path' -> __DIR__ . '/../views'
+    ));
+
+5/ Modification de nos vues :
+    -> view.php --> index.html.twig
+    -> produit.php ---> produit.html.twig
+
+
+    <php>
+    // Commentaire en php
+
+    $produit -> getTitre()
+    <?php foreach($produit as $pdt) ?>
+    $produit -> getTitre()
+
+    <twig>
+    {# commentaire en twig #}
+
+    {% for pdt in produits %}
+        {{pdt.titre}}
+    {% endfor; %}
+
+6/ Modification des routes
+    -> ajout de la méthode render()
+
+---> A ce stade, notre home doit s'afficher. Test : www.boutique.dev.
+---> En savoir plus sur Twig : https://twig.symfony.com/

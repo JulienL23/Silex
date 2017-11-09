@@ -24,7 +24,7 @@
 
 // Créer en étape 7.9 :
 
-$app -> get('/', function(){
+$app -> get('/', function() use($app){
 
     $produits = $app['dao.produit'] -> findAll();
     // $produits = objetModelProduit (ProduitDAO) -> findAll();
@@ -32,9 +32,49 @@ $app -> get('/', function(){
 
     $categories = $app['dao.produit'] -> findAllCategories();
 
-    ob_start();
-    require '../views/view.php';
-    $view = ob_get_clean();
-    return $view;
+    // ob_start();
+    // require '../views/view.php';
+    // $view = ob_get_clean();
+    // return $view;
+
+    // Ajouté à l'étape 8.6.
+    $params = array(
+        'produits' => $produits,
+        'categories' => $categories,
+        'title' => 'Accueil'
+    );
+
+    return $app['twig'] -> render('index.html.twig', $params);
+
+});
+
+$app->get('/produit/{id}', function($id) use($app)
+{
+
+   ob_start();
+   $pdt = $app['dao.produit']->findById($id);
+   require '../views/produit.php';
+   $view = ob_get_clean();
+  return $view;
+});
+
+
+// On souhaite construire une nouvelle route (fonctionnalité/affichage) qui va nous afficher tout les produit en fonction de la categorie. L'URL souhaitée est : www.boutique.dev/boutique/nom_de_la_categorie
+
+$app -> get('/boutique/{categorie}', function($categorie) use($app){
+
+    // Etape 1 : récupérer les produits en fonction de $categorie
+    // SELECT * FROM produit WHERE categorie = '$categorie'
+    $produits = $app['dao.produit'] -> findAllByCategorie($categorie);
+    // Etape 2 : Récupérer également toutes les categorie pour ré_afficher le menu latéral
+    $categories = $app['dao.produit'] -> findAllCategories();
+
+    $params = array(
+        'produits' => $produits,
+        'categories' => $categories,
+        'title' => 'Nos' . $categorie . 's'
+    );
+
+    return $app['twig'] -> render('index.html.twig', $params);
 
 });
