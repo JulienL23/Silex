@@ -48,14 +48,17 @@ $app -> get('/', function() use($app){
 
 });
 
+
+
 $app->get('/produit/{id}', function($id) use($app)
 {
+    $pdt = $app['dao.produit']->findById($id);
 
-   ob_start();
-   $pdt = $app['dao.produit']->findById($id);
-   require '../views/produit.php';
-   $view = ob_get_clean();
-  return $view;
+    $params = array(
+        'produit' => $pdt,
+    );
+
+        return $app['twig'] -> render('produit.html.twig', $params);
 });
 
 
