@@ -1,3 +1,5 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
 
 <h1> {{ produit.titre }} </h1>
 <img src="/photo/{{ produit.photo }}" width="250"/>
@@ -33,3 +35,5 @@
 
 	{% endif %}
 </fieldset>
+
+{% endblock %}

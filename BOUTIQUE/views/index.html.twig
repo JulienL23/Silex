@@ -1,63 +1,42 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Mon Site </title>
-        <link rel="stylesheet" href="/css/style.css"/>
-    </head>
-    <body>
-        <header>
-			<div class="conteneur">
-				<span>
-					<a href="" title="Mon Site">MonSite.com</a>
-                </span>
-				<nav>
-                    <a href="#">Connexion</a>
-                    <a href="#">Inscription</a>
-                    <a href="#">Profil</a>
-                    <a href="#">Panier</a>
-                    <a href="#">Boutique</a>
+{% extends 'layout.html.twig' %}
 
-				</nav>
-			</div>
-        </header>
-        <section>
-			<div class="conteneur">
+{% block title %}{{ title }}{% endblock %}
+{% block css_additionnel %}<link rel="stylesheet" href="{{ asset('/css/style.css') }}"/>{% endblock %}
 
+{% block slide_show %}
+    <div style="height: 200px; width: 60%; background : darkgrey; margin: 40px auto;"></div>
+{% endblock %}
 
-        </h1>Boutique</h1>
+{% block content %}
+    <div class="conteneur">
+    </h1>{{ title }}</h1>
 
-        <div class="boutique-gauche">
-        	<ul>
+    <div class="boutique-gauche">
+        <ul>
             <li><a href="/">Tous les produits</a></li>
             {% for categorie in categories %}
-        		<li><a href="/boutique/{{ categorie.categorie }}">{{ categorie.categorie }}</a></li>
+            <li><a href="{{ path('boutique', {'categorie' : categorie.categorie }) }}">{{ categorie.categorie }}</a></li>
             {% endfor %}
-        	</ul>
+        </ul>
+    </div>
+
+    <div class="boutique-droite">
+        {% for pdt in produits %}
+        <!-- Debut vignette produit -->
+        <div class="boutique-produit">
+            <h3>{{ pdt.titre }}</h3>
+            <a href="{{ path('produit', {'id' : pdt.id_produit } ) }}"><img src="/photo/{{ pdt.photo }}" height="100"/></a>
+            <p style="font-weight: bold; font-size: 20px;">{{ pdt.prix }}€</p>
+
+            <p style="height: 40px">{{ pdt.description | striptags | slice(0,40) }}[...]</p>
+            <a href="{{ path('produit', {'id' : pdt.id_produit } ) }}" style="padding:5px 15px; background: red; color:white; text-align: center; border: 2px solid black; border-radius: 3px" >Voir la fiche</a>
+            <!-- href="fiche_produit.php?id=id_du_produit" -->
         </div>
-
-        <div class="boutique-droite">
-            {% for pdt in produits %}
-        	<!-- Debut vignette produit -->
-        	<div class="boutique-produit">
-        		<h3>{{ pdt.titre }}</h3>
-        		<a href="/produit/{{ pdt.id_produit }}"><img src="/photo/{{ pdt.photo }}" height="100"/></a>
-        		<p style="font-weight: bold; font-size: 20px;">{{ pdt.prix }}€</p>
-
-        		<p style="height: 40px">{{ pdt.description | striptags | slice(0,40) }}[...]</p>
-        		<a href="/produit/{{ pdt.id_produit }}" style="padding:5px 15px; background: red; color:white; text-align: center; border: 2px solid black; border-radius: 3px" >Voir la fiche</a>
-        		<!-- href="fiche_produit.php?id=id_du_produit" -->
-        	</div>
-        	<!-- Fin vignette produit -->
+        <!-- Fin vignette produit -->
 
         {% endfor %}
-        </div>
+    </div>
 
     </div>
-    </section>
-    <footer>
-    <div class="conteneur">
-        {{ "now"|date("Y")}} - Tous droits reservés.
-    </div>
-    </footer>
-    </body>
-    </html>
+
+{% endblock %}

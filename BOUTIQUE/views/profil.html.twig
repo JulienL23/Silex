@@ -1,0 +1,38 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+ <!-- Contenu HTML -->
+ <h1>Profil de {{ profil.prenom }} </h1>
+<div class="profil">
+
+<div class="profil_img">
+    {% if profil.photo is defined %}
+    <img src="{{ asset('photo/' ~profil.photo ) }}" />
+    {% else %}
+    <img src="{{ asset('photo/default.png' ) }}" />
+    {% endif %}
+
+</div>
+<div class="profil_infos">
+    <ul>
+        <li>Pseudo : <b>{{ profil.pseudo }}</b></li>
+        <li>Prénom : <b>{{ profil.prenom }}</b></li>
+        <li>Nom :<b>{{ profil.nom }}</b></li>
+        <li>Email : <b>{{ profil.email }}</b></li>
+    </ul>
+</div>
+<div class="profil_adresse">
+    <ul>
+        <li>Adresse : <b>{{ profil.adresse }}</b></li>
+        <li>Code Postal : <b>{{ profil.code_postal }}</b></li>
+        <li>Ville : <b>{{ profil.ville }}</b></li>
+    </ul>
+</div>
+<div class="profil">
+    <h2>Détails des commandes</h2>
+    <p>Vous n'avez pas encore passé de commande !<br/>Venez visiter <a href="/"><u>notre boutique</u></a></p>
+</div>
+</div>
+
+{% endblock %}
