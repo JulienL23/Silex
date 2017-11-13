@@ -31,3 +31,9 @@ $app -> register(new Silex\Provider\AssetServiceProvider(), array(
 
 // On enregistre le service Form
 $app -> register(new Silex\Provider\FormServiceProvider());
+
+// On enregistre les services :
+
+$app -> register(new Silex\Provider\LocaleServiceProvider());
+$app -> register(new Silex\Provider\TranslationServiceProvider());
+$app -> register(new Silex\Provider\ValidatorServiceProvider());

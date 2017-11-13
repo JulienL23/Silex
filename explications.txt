@@ -521,16 +521,159 @@ Sommaire :
         **** contenu de la page ****
     {% endblock %}
 
----------------------------------
+-----------------------------------
 ETAPE 17 : FORMULAIRE DE CONTACT
----------------------------------
-Sommaire:
-1/ creer la route
-2/ faire le fichier contact.html.twig
-3/ Modifier la route (traitement de l'email)
-    -> mise à jour de l'app (json + composer)
-    -> enregistrement service forme
-    -> Form/Type/ContactType
-4/ Modifier la route (récupération du formulaire)
-5/ Modifier la vue contact.html.twig
-6/ Modifier la route (traitement de l'email)
+------------------------------------
+    Sommaire:
+    1/ Création de la route (render
+    2/ Faire le fichier contact.html.twig
+    3/ Créer ContactType (la classe qui va nous construire le formulaire)
+        -> mise à jour de l'app (json + composer)
+        -> enregistrement service form
+        -> Form/Type/ContactType
+    4/ Enregistrement de nouveaux services (json + composer + app.php)
+    5/ Modifier la route (récupération du formulaire)
+    6/ Modilier la vue contact.html.twig
+    7/ Modifier la route (traitement de l'email)
+
+    _________________________________
+    1/ Création de la route (render
+       -> Création de la route /contact.
+       -> Lorsqu'on intéragit avec un formulaire en silex, et si on utilise toutes les fonctionnalités de silex, il faut       utiliser le composant Request qui gère la soumission du formualire. La fonction anonyme function() attends donc un       objet de la clase Request
+       -> Le composant Request de HttpFoundation doit être USE en haut du fichier :
+          <code>
+          use Symfony\Component\HttpFoundation\Request
+       -> Cette route doit traiter des infos en get (nom de la route) et en post (info du formulaire), la fonction est donc            match (post+get) et non pas get().
+
+    ______________________________________
+    2/ Faire le fichier contact.html.twig
+       -> On ne crée pas le formulaire directment en HTML, on prépare simplement la page car le formualire sera crée à l'étape suivante via la classe abstraite AbstractType qui permet de créer des classes gérant la construction de nos formulaires.
+       -> Cette démarche est nouvelle mais très pratique par la suite.
+
+    ______________________________________________________________________
+    3/ Créer ContactType (la classe qui va nous construire le formulaire)
+        -> Dans Src/Form/Type/ : on crée un fichier ContactType.php
+        -> Cette classe va nous permettre de définir ce qu'est notre formilaire de contact. Elle hérite de la classe abstraite        AbstractType
+        -> La méthode FormBuilder va nous permettre de construire un formulaire et va attendre un argument un objet de l'interface FormBuilderInterface
+        -> La méthode add() de notre builder va nous permettre de construire chaque champs un par un avec des options possible pour chacun : Les contraintes, les classes ,les attributs etc...
+        -> Pour que l'ensemble fonction nous avons besoin de USE de composants :
+           <code>
+              use Symfony\Component\Form\AbstractType;
+    	  use Symfony\Component\Form\FormBuilderInterface;
+    	  use Symfony\Component\Form\Extension\Core\Type\TextType;
+    	  use Symfony\Component\Form\Extension\Core\Type\EmailType;
+    	  use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+    	  use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+    	  use Symfony\Component\Validator\Constraints as Assert;
+    	  use Symfony\Component\Validator\Constraints\NotBlank;
+    __________________________________________________________________
+    4/ Enregistrement de nouveaux services (json + composer + app.php)
+        -> mise à jour de l'app (json + composer)
+        <code>
+         {
+
+           "require": {
+
+               "silex/silex": "~2.0",
+
+               "doctrine/dbal": "2.5",
+
+               "twig/twig": "~1.28",
+
+               "symfony/asset": "~2.8|3.0.*",
+
+               "symfony/twig-bridge": "^3.3",
+
+               "symfony/form": "~2.8|3.0.*",
+
+               "symfony/translation": "~2.8|3.0.*",
+
+               "symfony/config": "~2.8|3.0.*",
+
+               "symfony/validator": "^3.2"
+
+            },
+
+            "autoload": {
+
+            "psr-4" : {"BOUTIQUE\\": "src"}
+
+    	}
+
+    }
+
+
+        <cmd>
+          composer update
+
+       -> enregistrement service form, translation, validator
+          <code>
+            $app -> register(new Silex\Provider\FormServiceProvider());
+            $app -> register(new Silex\Provider\LocaleServiceProvider());
+    	$app -> register(new Silex\Provider\TranslationServiceProvider());
+    	$app -> register(new Silex\Provider\ValidatorServiceProvider());
+
+    _________________________________________________
+    5/ Modifier la route (récupération du formulaire)
+       -> La fonction Create() de $app['form.factiry'] va construire et récupérer notre formulaire en lui précisant le type de formulaire à recupérer.
+       -> HandleRequest($request) de notre formulaire va gérer les infos récupérées.
+       -> CreateView() de notre formulaire va créer la partie viduel de notre formulaire, et c'est cela que nous allons envoyer à la vue
+
+    _____________________________________
+    6/ Modilier la vue contact.html.twig
+       -> Twig simplifie énormement la gestion de l'affichage du formulaire, l'affichage des données dans le formualire et l'affichage des messages d'erreurs :
+         <code>
+         {% if contactForm %}
+           {{ form_start(contactForm) }}
+           	   <label>Prénom:</label>
+                  {{ form_errors(contactForm.prenom) }}
+                  {{ form_widget(contactForm.prenom) }}
+               ...
+               ...
+            {{ form_end(contactForm) }}
+         {% endif %}
+    ____________________________________________
+
+    7/ Modifier la route (traitement de l'email)
+        -> Notre contactForm contient une methode isSubmitted() et isValid() qui nous permettent de savoir si le formulaire est        activé et validé.
+        -> Ce système remplace un nombre incalculable de ligne PHP en mode procédural.
+
+
+    ===> A ce stade le formulaire www.boutique.dev/contact doit s'afficher et nous retourner un print_r() avec toutes les infos en post
+    ===> Il suffirait d'ajouter des traitement dans notre route pour que le fonctionnement soit complet.cdf
+
+---------------------------------------
+ETAPE 19: Réorganisation en Controller
+---------------------------------------
+1/ Création de deux controller : baseController et ProduitController dans le dossier Controller
+2/ Création des fonctions dans notre controller
+3/ Modification des routes
+4/ Modification des fonctions dans nos controller
+
+-----
+
+1/ Création de deux controller : BaseController et ProduitController dans le dossier Controller
+    -> Dans le dossier src on créé Controller/
+        -> Controller/BaseController.php
+        -> Controller/ProduitController.php
+        -> Controller/MembreController.php
+
+    -> Dans chaque controller, on a autant d'action (fonction) que d'affichage prévue. On affiche -- une fonction
+
+2/ On créer des fonctions pour chaque controller en fonction des affichages et des actions qu'ils doivent gérer.
+    -> exemple : ProduitController -> produitAction($id)
+    -> exemple : ProduitController -> boutiqueAction($categorie)
+
+3/ Les routes ne contiennent plus de fonction anonyme et donc plus de traitement, mais appellent simplement la fonction qu'il va falloir exécuter.
+
+4/ Tous les traitements qui étaient présents dans les routes, sont maintenant encapsulés dans les fontions des Controller.
+
+-----------------------
+ETAPE 18: BACKOFFICE
+-----------------------
+1/ Créer un controller BackOfficeController
+2/ Créer la route get('backoffice/produit') dont le nom est bo_produit
+3/ Créer la fonction produitAction dans BackOfficeController et gérer toute la fonction
+4/ Créer la vue backoffice_produit.html.twig qui va afficher tous les produits sous forme d'un tableau HTML, (boucle)
+5/ Créer la route match('backoffice/produit/add') dont le nom est bo_produit_add
+6/ 

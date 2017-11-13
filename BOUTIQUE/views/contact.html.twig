@@ -5,7 +5,7 @@
 {% block content %}
 <h1>{{ title }}</h1>
 
-    {% contactForm %}
+    {% if contactForm %}
 
     {{ form_start(contactForm) }}
     <label>Prénom : </label>
@@ -20,6 +20,10 @@
     {{ form_errors(contactForm.email) }}
     {{ form_widget(contactForm.email) }}
 
+    <label>Sujet :</label>
+    {{ form_errors(contactForm.sujet) }}
+    {{ form_widget(contactForm.sujet) }}
+
     <label>Message : </label>
     {{ form_errors(contactForm.message) }}
     {{ form_widget(contactForm.message) }}
@@ -28,4 +32,5 @@
 
     {{ form_end(contactForm) }}
 
+    {% endif %}
 {% endblock %}

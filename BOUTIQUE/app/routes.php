@@ -27,100 +27,28 @@ use Symfony\Component\HttpFoundation\Request;
 
 // Créer en étape 7.9 :
 
-$app -> get('/', function() use($app){
-
-    $produits = $app['dao.produit'] -> findAll();
-    // $produits = objetModelProduit (ProduitDAO) -> findAll();
-    // produits est tableau multidimentionnel composé d'objet
-
-    $categories = $app['dao.produit'] -> findAllCategories();
-
-    // ob_start();
-    // require '../views/view.php';
-    // $view = ob_get_clean();
-    // return $view;
-
-    // Ajouté à l'étape 8.6.
-    $params = array(
-        'produits' => $produits,
-        'categories' => $categories,
-        'title' => 'Accueil'
-    );
-
-    return $app['twig'] -> render('index.html.twig', $params);
-})-> bind('home');
+$app -> get('/', "BOUTIQUE\Controller\BaseController::indexAction")-> bind('home');
 
 /////////////////////////////////////////
 
-$app->get('/produit/{id}', function($id) use($app)
-{
-    $pdt = $app['dao.produit']->findById($id);
-
-    $params = array(
-        'produit' => $pdt,
-    );
-
-        return $app['twig'] -> render('produit.html.twig', $params);
-})-> bind('produit');
+$app->get('/produit/{id}', "BOUTIQUE\Controller\ProduitController::produitAction")-> bind('produit');
 
 /////////////////////////////////////////
 // On souhaite construire une nouvelle route (fonctionnalité/affichage) qui va nous afficher tout les produit en fonction de la categorie. L'URL souhaitée est : www.boutique.dev/boutique/nom_de_la_categorie
 
-$app -> get('/boutique/{categorie}', function($categorie) use($app){
-
-    // Etape 1 : récupérer les produits en fonction de $categorie
-    // SELECT * FROM produit WHERE categorie = '$categorie'
-    $produits = $app['dao.produit'] -> findAllByCategorie($categorie);
-    // Etape 2 : Récupérer également toutes les categorie pour ré_afficher le menu latéral
-    $categories = $app['dao.produit'] -> findAllCategories();
-
-    $params = array(
-        'produits' => $produits,
-        'categories' => $categories,
-        'title' => 'Nos' . $categorie . 's'
-    );
-
-    return $app['twig'] -> render('index.html.twig', $params);
-
-})-> bind('boutique');
+$app -> get('/boutique/{categorie}', "BOUTIQUE\Controller\ProduitController::boutiqueAction")-> bind('boutique');
 
 
 // exo : Faire la route qui va afficher la page de profil. En simulant à l'intérieur de la route l'ouverture de la session et en enregistrant dans $_SESSION['membre'] les infos d'un membre au hasard.
 
-$app -> get('/profil/', function() use($app){
-
-    session_start();
-    $_SESSION['membre']['id_membre'] = '1' ;
-    $_SESSION['membre']['pseudo'] = 'Picsou23' ;
-    $_SESSION['membre']['sexe'] = 'm' ;
-    $_SESSION['membre']['prenom'] = 'Julien' ;
-    $_SESSION['membre']['nom'] = 'Anonyme' ;
-    $_SESSION['membre']['email'] = 'Blablabla@bla.com' ;
-    $_SESSION['membre']['adresse'] = 'Dans ton c**' ;
-    $_SESSION['membre']['code_postal'] = '92230' ;
-    $_SESSION['membre']['ville'] = 'Gennevilliers' ;
-    $_SESSION['membre']['statut'] = '0' ;
-
-    // Etc ...
-    $params = array(
-        'profil' => $_SESSION['membre'],
-    );
-
-    //On rend la vue profil.html.twig
-
-    return $app['twig'] -> render('profil.html.twig', $params);
-})-> bind('profil');
+$app -> get('/profil/', "BOUTIQUE\Controller\MembreController::profilAction")-> bind('profil');
 
 
 // Fonctionnalité pour le formulaire de contact
-$app -> match('/contact/', function(Request $request) use($app){ // car on récupère des infos en post on met la class Request dans fonction
-    $contactForm = $app['form.factory'] -> create(BOUTIQUE\Form\Type\ContactType::class);
+$app -> match('/contact/', "BOUTIQUE\Controller\BaseController::contactAction")-> bind('contact');
 
+// Route pour l'affichage de tous les produits dans le backoffice (dans un tableau HTML)
+$app -> get('/backoffice/produit/', 'BOUTIQUE\Controller\BackOfficeController::produitAction') -> bind('bo_produit');
 
-    $params = array(
-        'title' => 'Formulaire Contact',
-        'contactForm' => $contactFormView
-    );
-    return $app['twig'] -> render('contact.html.twig', $params);
-
-})-> bind('contact');
+// Route pour ajouter un nouveau produit
+$app -> match('/backoffice/produit/add/', 'BOUTIQUE\Controller\BackOfficeController::addProduitAction') -> bind('bo_produit_add');
